@@ -1,14 +1,23 @@
-import { Directive, Input, OnInit, ElementRef, AfterViewInit } from '@angular/core';
+import { Directive, Input, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+
+export interface IModel {
+  IsActive: boolean;
+  DomId: string;
+}
 
 @Directive({
-  selector: '[makeReadonly]'
+  selector: '[read-only]'
 })
-export class MakeReadonlyDirective implements AfterViewInit {
-  @Input('makeReadonly') readOnlyObj: any;
+export class ReadOnlyDirective implements AfterViewInit {
+  @Input('read-only') readOnlyObj: IModel;
 
-  constructor() { }
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
 
   ngAfterViewInit() {
+    if (!isPlatformBrowser(this.platformId))
+      return;
+
     if (this.readOnlyObj['IsActive']) {
       this.disableControls(this.readOnlyObj['DomId']);
     }
@@ -30,12 +39,13 @@ export class MakeReadonlyDirective implements AfterViewInit {
     const btnToggleElments = parentElement.getElementsByTagName('mat-button-toggle');
     const chipElments = parentElement.getElementsByTagName('mat-chip');
     const formFieldElments = parentElement.getElementsByTagName('mat-form-field');
+    const anchorElments = parentElement.getElementsByTagName('a');
 
     disableControls = disableControls.concat(
       inputElments, txtAreaElments, autocompleteElments,
       datepickerElments, buttonElments, checkboxElments,
       radioElments, sliderElments, slideToggleElments,
-      btnToggleElments, chipElments, formFieldElments);
+      btnToggleElments, chipElments, formFieldElments, anchorElments);
 
     this.setDisableAttribute(disableControls);
   }
@@ -44,8 +54,7 @@ export class MakeReadonlyDirective implements AfterViewInit {
     allControls.forEach(controls => {
       for (let i = 0; i < controls.length; i++) {
         controls[i]['disabled'] = true;
-        if (!controls[i].classList.contains("pointer-none"))
-          controls[i].classList.add("pointer-none");
+        controls[i].style['pointer-events'] = 'none';
       }
     });
   }

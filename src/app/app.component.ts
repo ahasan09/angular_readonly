@@ -16,6 +16,10 @@ export interface State {
 export class AppComponent {
   stateCtrl = new FormControl();
   filteredStates: Observable<State[]>;
+  readOnlyModel = {
+    IsActive: true,
+    DomId: 'example'
+  };
 
   states: State[] = [
     {
@@ -43,7 +47,7 @@ export class AppComponent {
       flag: 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Flag_of_Texas.svg'
     }
   ];
-  
+
   favoriteSeason: string;
   seasons: string[] = ['Winter'];
 
@@ -57,7 +61,7 @@ export class AppComponent {
     { name: 'Primary', color: 'primary' }
   ];
 
-  testClick(){
+  testClick() {
     alert('Test');
   }
 }
