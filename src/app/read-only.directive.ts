@@ -1,8 +1,9 @@
 import { Directive, Input, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { ReadOnlyService } from './read-only.service';
 
 export interface IModel {
-  IsActive: boolean;
+  IsReadable: boolean;
   DomId: string;
 }
 
@@ -12,20 +13,38 @@ export interface IModel {
 export class ReadOnlyDirective implements AfterViewInit {
   @Input('read-only') readOnlyObj: IModel;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private readOnlyService: ReadOnlyService
+  ) {
 
-  ngAfterViewInit() {
+  }
+
+  ngOnInit() {
+    this.readOnlyService.readOnlyEvent.subscribe((response: IModel) => {
+      this.executeDisableControls(response);
+    })
+  }
+
+  executeDisableControls(payload: IModel) {
     if (!isPlatformBrowser(this.platformId))
       return;
 
-    if (this.readOnlyObj['IsActive']) {
-      this.disableControls(this.readOnlyObj['DomId']);
-    }
+    let controls = this.getAllControls(payload['DomId']);
+
+    if (payload['IsReadable'])
+      this.setDisableAttribute(controls);
+    else
+      this.removeDisableAttribute(controls);
   }
 
-  disableControls(domId) {
+  ngAfterViewInit() {
+    this.executeDisableControls(this.readOnlyObj);
+  }
+
+  getAllControls(domId) {
     const parentElement: HTMLElement = document.getElementById(domId) as HTMLElement;
-    let disableControls: any = [];
+    let controls: any = [];
 
     const inputElments = parentElement.getElementsByTagName('input');
     const txtAreaElments = parentElement.getElementsByTagName('textarea');
@@ -40,21 +59,36 @@ export class ReadOnlyDirective implements AfterViewInit {
     const chipElments = parentElement.getElementsByTagName('mat-chip');
     const formFieldElments = parentElement.getElementsByTagName('mat-form-field');
     const anchorElments = parentElement.getElementsByTagName('a');
+    const spanElments = parentElement.getElementsByTagName('span');
 
-    disableControls = disableControls.concat(
+    controls = controls.concat(
       inputElments, txtAreaElments, autocompleteElments,
       datepickerElments, buttonElments, checkboxElments,
       radioElments, sliderElments, slideToggleElments,
-      btnToggleElments, chipElments, formFieldElments, anchorElments);
+      btnToggleElments, chipElments, formFieldElments,
+      anchorElments, spanElments);
 
-    this.setDisableAttribute(disableControls);
+    return controls;
   }
 
   setDisableAttribute(allControls) {
     allControls.forEach(controls => {
       for (let i = 0; i < controls.length; i++) {
         controls[i]['disabled'] = true;
+
+        if (controls[i].classList.contains('cursor-pointer'))
+          controls[i].classList.remove('cursor-pointer');
+
         controls[i].style['pointer-events'] = 'none';
+      }
+    });
+  }
+
+  removeDisableAttribute(allControls) {
+    allControls.forEach(controls => {
+      for (let i = 0; i < controls.length; i++) {
+        controls[i]['disabled'] = false;
+        controls[i].style['pointer-events'] = null;
       }
     });
   }

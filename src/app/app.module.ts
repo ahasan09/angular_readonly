@@ -41,6 +41,7 @@ import {
 } from '@angular/material';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
+import { ReadOnlyService } from './read-only.service';
 
 
 @NgModule({
@@ -89,7 +90,7 @@ import { AppComponent } from './app.component';
     FormsModule,
     ReactiveFormsModule
   ],
-  providers: [],
+  providers: [ReadOnlyService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
