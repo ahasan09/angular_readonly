@@ -56,4 +56,8 @@ export class AppComponent {
   availableColors = [
     { name: 'Primary', color: 'primary' }
   ];
+
+  testClick(){
+    alert('Test');
+  }
 }

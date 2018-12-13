@@ -58,4 +58,8 @@
   mat-chip {
     max-width: 200px;
   }
+
+  .pointer-none{
+    pointer-events: none;
+  }
   
